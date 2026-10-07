@@ -180,7 +180,7 @@
 
 <header class="top">
   <div class="wrap">
-    <div class="brand">Taller <span>Péptidos</span></div>
+    <a class="brand" href="index.html" style="text-decoration:none">Taller <span>Péptidos</span></a>
     <div class="pill" id="pill">Precio especial por 24 horas</div>
   </div>
 </header>
@@ -307,7 +307,7 @@
       <section>
         <div class="bar"></div>
         <h2>Preguntas <span class="t2">frecuentes</span></h2>
-        <details><summary>¿Cómo pago?</summary><p>Con PayPal o por transferencia bancaria en República Dominicana, Costa Rica (incluye SINPE Móvil) o Colombia (incluye Nequi). Elige tu opción en el recuadro de inscripción.</p></details>
+        <details><summary>¿Cómo pago?</summary><p>Con PayPal, Zelle o por transferencia bancaria en República Dominicana, Costa Rica (incluye SINPE Móvil) o Colombia (incluye Nequi). Elige tu opción en el recuadro de inscripción.</p></details>
         <details><summary>¿Cómo recibo el acceso?</summary><p>Si pagas por transferencia, sube la foto o el PDF de tu comprobante en el mismo recuadro. Cuando verificamos el pago, te enviamos por correo el enlace al grupo médico de WhatsApp.</p></details>
         <details><summary>¿En qué moneda pago?</summary><p>El precio es en dólares estadounidenses. Si transfieres en moneda local, envía el equivalente al cambio del día.</p></details>
         <details><summary>¿Qué pasa si no puedo asistir en vivo?</summary><p>La grabación queda disponible durante 10 días.</p></details>
@@ -382,8 +382,9 @@
   </div>
 </main>
 
-<footer><div class="wrap">Taller | Biomoduladores del apetito y activos avanzados. Contenido dirigido a profesionales de la salud.</div></footer>
+<footer><div class="wrap">Taller | Biomoduladores del apetito y activos avanzados. Contenido dirigido a profesionales de la salud. · <a href="index.html">Todos los cursos</a></div></footer>
 
+<script src="cursos.js"></script>
 <script>
 /* ===================== CONFIGURACIÓN ===================== */
 const CONFIG = {
@@ -401,36 +402,12 @@ const CONFIG = {
   // Si lo llenas (cuenta PayPal Business), el pago se confirma solo y el acceso sale al instante.
   PAYPAL_CLIENT_ID: '',
 
-  // PayPal con comprobante (se usa cuando PAYPAL_CLIENT_ID está vacío)
-  PAYPAL_MANUAL: {
-    correo: 'aleidamaldonadosalas17@gmail.com',
-    titular: 'Aleida Maldonado',
-    enlace: '',   // opcional: enlace paypal.me
-    qr: ''        // opcional: URL de la imagen del código QR
-  },
+  // PayPal, Zelle y cuentas: se editan en cursos.js (compartidos con todos los cursos)
+  PAYPAL_MANUAL: ACADEMIA.PAGOS.PAYPAL,
+  CUENTAS: ACADEMIA.PAGOS.CUENTAS,
 
   // Monto en moneda local (opcional). Si lo dejas vacío se muestra "equivalente al cambio del día".
-  MONTO_LOCAL: { DO: '', CR: '', CO: '' },
-
-  // Cuentas para transferencia
-  CUENTAS: {
-    DO: { pais: 'República Dominicana', corto: 'Rep. Dominicana', cuentas: [
-      { banco: 'BHD', titular: 'Katheryn Escorcia Maldonado', datos: [['Cuenta de ahorros', '37347730011']] },
-      { banco: 'Banreservas', titular: 'Katheryn Escorcia Maldonado', datos: [['Cuenta de ahorros', '96085058536']] },
-      { banco: 'AFAP', titular: 'Greicy Castillo', datos: [['Cuenta', '1022133284']] },
-      { banco: 'Promerica', titular: 'Greicy Castillo', datos: [['Cuenta', '12110000459-459']] },
-      { banco: 'Banco Popular', titular: 'Ana María Sánchez', datos: [['Cuenta de ahorros', '781120712']] }
-    ]},
-    CR: { pais: 'Costa Rica', corto: 'Costa Rica', cuentas: [
-      { banco: 'SINPE Móvil', titular: 'Jerson Mora Hernández', datos: [['Número', '72990240']] },
-      { banco: 'Banco Nacional de Costa Rica', titular: 'Jerson Mora Hernández', datos: [['Cuenta', '701091225'], ['Cédula', '304640218']] },
-      { banco: 'Banco BAC', titular: 'Jerson Mora Hernández', datos: [['Cuenta BAC', '701091225'], ['IBAN', 'CR13010200007010912259']] }
-    ]},
-    CO: { pais: 'Colombia', corto: 'Colombia', cuentas: [
-      { banco: 'Nequi', titular: 'Aleida Maldonado', datos: [['Número', '3146352423']] },
-      { banco: 'Bancolombia', titular: 'Aleida Maldonado', datos: [['Cuenta de ahorros', '486 622 394-48']] }
-    ]}
-  }
+  MONTO_LOCAL: { DO: '', CR: '', CO: '' }
 };
 /* ========================================================= */
 
@@ -501,6 +478,7 @@ async function post(payload){
 /* ---------- Métodos de pago ---------- */
 function montoTexto(pais){
   const local = CONFIG.MONTO_LOCAL[pais];
+  if (CONFIG.CUENTAS[pais].usd) return 'Monto: <b class="usd-now">' + usd(precioActual()) + '</b>.';
   return 'Monto: <b class="usd-now">' + usd(precioActual()) + '</b>' +
     (local ? ' (' + esc(local) + ')' : ' o su equivalente en moneda local al cambio del día') + '.';
 }
@@ -510,7 +488,7 @@ function kv(label, value){
 }
 
 const opciones = [{ id: 'paypal', titulo: 'PayPal', sub: paypalAuto ? 'o tarjeta, acceso inmediato' : 'envío a nuestro correo' }]
-  .concat(Object.keys(CONFIG.CUENTAS).map(k => ({ id: k, titulo: 'Transferencia', sub: CONFIG.CUENTAS[k].corto })));
+  .concat(Object.keys(CONFIG.CUENTAS).map(k => ({ id: k, titulo: CONFIG.CUENTAS[k].titulo || 'Transferencia', sub: CONFIG.CUENTAS[k].corto })));
 
 $('methods').innerHTML = opciones.map(o =>
   '<label class="method"><input type="radio" name="metodo" value="' + o.id + '"><span>' + esc(o.titulo) +
@@ -541,7 +519,7 @@ function elegir(id){
     $('cuentas').innerHTML = c.cuentas.map(a =>
       '<div class="acct"><div class="bank">' + esc(a.banco) + '</div><div class="who">Titular: ' + esc(a.titular) + '</div>' +
       a.datos.map(d => kv(d[0], d[1])).join('') + '</div>').join('') +
-      '<p class="amount" style="padding-bottom:10px">' + montoTexto(id) + ' Transfiere a cualquiera de estas cuentas y luego sube tu comprobante.</p>';
+      '<p class="amount" style="padding-bottom:10px">' + montoTexto(id) + (c.cuentas.length > 1 ? ' Transfiere a cualquiera de estas cuentas' : ' Envía el pago') + ' y luego sube tu comprobante.</p>';
   }
 }
 
@@ -579,8 +557,8 @@ $('send').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Enviando…';
   try {
     await post({
-      action: 'comprobante', ...b,
-      metodo: metodo === 'paypal' ? 'PayPal (comprobante)' : 'Transferencia ' + CONFIG.CUENTAS[metodo].pais,
+      action: 'comprobante', curso: 'taller', ...b,
+      metodo: metodo === 'paypal' ? 'PayPal (comprobante)' : CONFIG.CUENTAS[metodo].metodo,
       referencia: $('referencia').value.trim(),
       monto: precioActual(), moneda: CONFIG.MONEDA,
       archivo: { nombre: file.name, tipo: file.type, base64: await leerArchivo(file) }
